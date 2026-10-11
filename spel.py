@@ -27,6 +27,14 @@ for _namn, _pa in (('exit_button', False), ('fps_counter', True), ('cog_button',
     if getattr(window, _namn, None):
         getattr(window, _namn).enabled = _pa
 window.color = color.black
+
+
+def las_mus(pa):
+    """Fånga eller släpp musen utan att fönstret hoppar tillbaka dit det startade."""
+    window.clearOrigin()       # annars skickar ursina med den gamla platsen varje gång
+    mouse.locked = pa
+
+
 camera.fov = 78
 camera.clip_plane_near = .12
 camera.clip_plane_far = 2500
@@ -186,8 +194,6 @@ class Spel:
         self._bygg_hud()
         self._ljus(0)
         self.visa_panel('titel')
-        if not TEST:
-            mouse.locked = True
 
     # ==========================================================================
     # VÄRLDEN
@@ -814,7 +820,7 @@ class Spel:
         self.lage = 'slut'
         self.slutorsak = orsak
         self.visa_panel('slut')
-        mouse.locked = False
+        las_mus(False)
 
     def _anvand(self):
         if self.i_rover:
@@ -867,11 +873,13 @@ class Spel:
         if key == 'f11':
             window.fullscreen = not window.fullscreen
         if key == 'm':
-            mouse.locked = not mouse.locked
+            las_mus(not mouse.locked)
         if self.lage == 'titel':
             if key in ('enter', 'space', 'left mouse down'):
                 self.lage = 'spel'
                 self.visa_panel(None)
+                if not TEST:
+                    las_mus(True)
                 self.sag('Sol 1. Hitta raketdelarna och håll dig vid liv.', 8)
                 self.sag('En svag radiosignal hörs i nordost, nära basen...', 10)
             return
@@ -888,7 +896,7 @@ class Spel:
                 self.paus = False
                 self.visa_panel(None)
                 if not TEST:
-                    mouse.locked = True
+                    las_mus(True)
             elif key == 'q':
                 application.quit()
             return
@@ -901,7 +909,7 @@ class Spel:
         if key == 'escape':
             self.paus = True
             self.visa_panel('paus')
-            mouse.locked = False
+            las_mus(False)
         elif key == 'e':
             self._anvand()
         elif key == 'left mouse down':
@@ -1321,7 +1329,7 @@ class Spel:
                               + ('Alla sex robotarna från Daidalos följde med.' if n == 6 else
                                  f'{n} av Daidalos robotar följde med hem.' if n else 'Men robotarna från Daidalos blev kvar...'))
             self.visa_panel('vinst')
-            mouse.locked = False
+            las_mus(False)
 
     # ---- vad kan man trycka E på just nu? ----------------------------------
     def _hitta_sak(self):

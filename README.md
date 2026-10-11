@@ -25,7 +25,7 @@ Första gången på en ny dator:
 | E | använd, öppna, gå in och ut |
 | F | ät (bara inomhus eller i rovern) |
 | Vänster musknapp | skjut med laserborren |
-| V | se Mark utifrån |
+| V | se Mark utifrån |wwwwasdsssssss
 | H | hjälp |
 | M | släpp / fånga musen |
 | F11 | helskärm |
