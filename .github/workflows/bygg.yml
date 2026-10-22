@@ -1,0 +1,73 @@
+# Bygger spelet för Windows, Mac och Linux.
+#
+# - Varje push till main: zip-filerna hamnar under "Artifacts" på körningens sida i fliken Actions.
+# - En tagg som börjar med v (t.ex. v1.0): zip-filerna läggs dessutom upp som en Release.
+# - Går också att starta för hand från fliken Actions ("Run workflow").
+
+name: Bygg spelet
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bygg:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            namn: Mars-Windows
+          - os: macos-latest
+            namn: Mars-Mac
+          # 22.04 så att spelet även går på lite äldre Linux-datorer
+          - os: ubuntu-22.04
+            namn: Mars-Linux
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Installera
+        run: pip install -r requirements.txt pyinstaller
+
+      - name: Bygg
+        run: >
+          pyinstaller --noconfirm --windowed --name Mars
+          --collect-all ursina
+          --collect-all panda3d
+          --collect-all panda3d_gltf
+          --collect-all panda3d_simplepbr
+          main.py
+
+      - name: Packa (Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path dist/Mars -DestinationPath ${{ matrix.namn }}.zip
+
+      - name: Packa (Mac)
+        if: runner.os == 'macOS'
+        run: ditto -c -k --keepParent dist/Mars.app ${{ matrix.namn }}.zip
+
+      - name: Packa (Linux)
+        if: runner.os == 'Linux'
+        run: cd dist && zip -qry ../${{ matrix.namn }}.zip Mars
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.namn }}
+          path: ${{ matrix.namn }}.zip
+
+      - name: Lägg upp som Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.namn }}.zip

@@ -14,6 +14,24 @@ Första gången på en ny dator:
     python3 -m venv .venv
     .venv/bin/pip install -r requirements.txt
 
+## Spela utan Python (Windows, Mac, Linux)
+
+GitHub bygger spelet automatiskt varje gång något pushas till `main`
+(se `.github/workflows/bygg.yml`). Gå till fliken **Actions** på GitHub, klicka på
+senaste körningen och ladda ner `Mars-Windows`, `Mars-Mac` eller `Mars-Linux` längst ner.
+
+Vill du göra en riktig version att dela ut, skapa en tagg:
+
+    git tag v1.0
+    git push origin v1.0
+
+Då hamnar zip-filerna under **Releases** på GitHub.
+
+- **Windows:** packa upp och kör `Mars.exe`. Klicka "Mer information" → "Kör ändå" om Windows varnar.
+- **Mac:** packa upp, högerklicka på `Mars` → "Öppna" första gången (appen är inte signerad).
+  Bygget är för Mac med Apple-chip (M1 och nyare).
+- **Linux:** packa upp och kör `Mars/Mars`.
+
 ## Tangenter
 
 | Tangent | Vad den gör |
