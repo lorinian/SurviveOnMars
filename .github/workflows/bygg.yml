@@ -31,22 +31,30 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
       - name: Installera
         run: pip install -r requirements.txt pyinstaller
 
+      # Panda3D för Mac har några filer som bara finns för Intel-Mac (t.ex. rocket).
+      # Spelet använder dem inte, men PyInstaller vägrar bygga med dem, så vi tar bort dem.
+      - name: Ta bort Intel-filer (Mac)
+        if: runner.os == 'macOS'
+        run: |
+          mapp=$(python -c "import panda3d, os; print(os.path.dirname(panda3d.__file__))")
+          find "$mapp" -name '*.so' -o -name '*.dylib' | while read -r f; do
+            lipo -archs "$f" | grep -q arm64 || { echo "Tar bort $f"; rm "$f"; }
+          done
+
       - name: Bygg
         run: >
           pyinstaller --noconfirm --windowed --name Mars
           --collect-all ursina
           --collect-all panda3d
-          --collect-all panda3d_gltf
-          --collect-all panda3d_simplepbr
           main.py
 
       - name: Packa (Windows)
@@ -61,13 +69,13 @@ jobs:
         if: runner.os == 'Linux'
         run: cd dist && zip -qry ../${{ matrix.namn }}.zip Mars
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.namn }}
           path: ${{ matrix.namn }}.zip
 
       - name: Lägg upp som Release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: ${{ matrix.namn }}.zip
